@@ -3,8 +3,11 @@ import { useAuthStore } from '../store/authStore';
 
 const API_URL = import.meta.env.VITE_API_URL || '';
 
+// If API_URL already ends with /api or is just /api, don't append it again
+const baseURL = API_URL.endsWith('/api') ? API_URL : `${API_URL}/api`;
+
 const api = axios.create({
-  baseURL: `${API_URL}/api`,
+  baseURL,
   withCredentials: true,
 });
 
@@ -53,7 +56,7 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       try {
         console.log('🔄 Refreshing token...');
-        const res = await axios.post(`${API_URL}/api/auth/refresh`, {}, { withCredentials: true });
+        const res = await axios.post(`${baseURL}/auth/refresh`, {}, { withCredentials: true });
         const { accessToken, user } = res.data.data;
         useAuthStore.getState().setAuth(user, accessToken);
         originalRequest.headers.Authorization = `Bearer ${accessToken}`;

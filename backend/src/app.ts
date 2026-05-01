@@ -16,6 +16,11 @@ import { env } from "./config/env";
 
 export const app = express();
 
+app.use((req, res, next) => {
+  console.log(`[DEBUG] ${req.method} ${req.url}`);
+  next();
+});
+
 // ── Security headers ──────────────────────────────────────────────────────────
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
@@ -25,7 +30,13 @@ app.use(helmet({
 app.use(cors({
   origin: env.NODE_ENV === "production"
     ? (env.CORS_ORIGIN ?? "").split(",").map(s => s.trim())
-    : ["http://localhost:5173", "http://localhost:4173"],
+    : (origin, callback) => {
+        if (!origin || origin.startsWith('http://localhost:')) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      },
   credentials: true,
 }));
 

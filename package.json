@@ -1,9 +1,16 @@
 {
   "name": "linear-clone",
   "private": true,
-  "workspaces": ["backend", "frontend"],
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
   "scripts": {
+    "dev": "concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
     "build": "npm run build -w backend && npm run build -w frontend && cp -r frontend/dist backend/dist/public",
     "start": "node backend/dist/index.js"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }

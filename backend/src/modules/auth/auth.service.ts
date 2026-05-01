@@ -5,7 +5,8 @@ import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../../lib
 
 export class AuthService {
   static async register(data: any) {
-    const existing = await prisma.user.findUnique({ where: { email: data.email } });
+    const email = data.email.toLowerCase().trim();
+    const existing = await prisma.user.findUnique({ where: { email } });
     if (existing) {
       throw new AppError(409, "Email already in use", "CONFLICT");
     }
@@ -13,8 +14,8 @@ export class AuthService {
     const passwordHash = await bcrypt.hash(data.password, 12);
     const user = await prisma.user.create({
       data: {
-        email: data.email,
-        name: data.name,
+        email,
+        name: data.name.trim(),
         passwordHash,
       },
     });
@@ -37,7 +38,8 @@ export class AuthService {
   }
 
   static async login(data: any) {
-    const user = await prisma.user.findUnique({ where: { email: data.email } });
+    const email = data.email.toLowerCase().trim();
+    const user = await prisma.user.findUnique({ where: { email } });
     if (!user) {
       throw new AppError(401, "Invalid email or password", "UNAUTHORIZED");
     }

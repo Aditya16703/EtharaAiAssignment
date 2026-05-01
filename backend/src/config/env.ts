@@ -19,11 +19,11 @@ const envSchema = z.object({
 let parsedEnv;
 try {
   parsedEnv = envSchema.parse(process.env);
-} catch (error) {
+} catch (error: any) {
   if (error instanceof z.ZodError) {
     console.error("❌ Environment validation failed:");
-    error.errors.forEach((err) => {
-      console.error(`   - ${err.path.join(".")}: ${err.message}`);
+    error.issues.forEach((issue: any) => {
+      console.error(`   - ${issue.path.join(".")}: ${issue.message}`);
     });
   } else {
     console.error("❌ Failed to parse environment variables:", error);

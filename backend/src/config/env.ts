@@ -16,4 +16,19 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().optional(),
 });
 
-export const env = envSchema.parse(process.env);
+let parsedEnv;
+try {
+  parsedEnv = envSchema.parse(process.env);
+} catch (error) {
+  if (error instanceof z.ZodError) {
+    console.error("❌ Environment validation failed:");
+    error.errors.forEach((err) => {
+      console.error(`   - ${err.path.join(".")}: ${err.message}`);
+    });
+  } else {
+    console.error("❌ Failed to parse environment variables:", error);
+  }
+  process.exit(1);
+}
+
+export const env = parsedEnv!;

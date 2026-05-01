@@ -30,7 +30,7 @@ app.use(helmet({
 app.use(cors({
   origin: env.NODE_ENV === "production"
     ? (env.CORS_ORIGIN ?? "").split(",").map(s => s.trim())
-    : (origin, callback) => {
+    : (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
         if (!origin || origin.startsWith('http://localhost:')) {
           callback(null, true);
         } else {

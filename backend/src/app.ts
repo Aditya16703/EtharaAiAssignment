@@ -87,7 +87,7 @@ import path from "path";
 
 if (env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "public")));
-  app.get("*", (_req, res) => {
+  app.get("(.*)", (_req, res) => {
     res.sendFile(path.join(__dirname, "public", "index.html"));
   });
 } else {

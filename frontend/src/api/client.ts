@@ -1,67 +1,65 @@
 import axios from 'axios';
-
-// Get token from localStorage if any
-const getAccessToken = () => localStorage.getItem('accessToken');
-export const setAccessToken = (token: string | null) => {
-  if (token) localStorage.setItem('accessToken', token);
-  else localStorage.removeItem('accessToken');
-};
+import { useAuthStore } from '../store/authStore';
 
 const api = axios.create({
   baseURL: '/api',
   withCredentials: true,
 });
 
+// ── Request interceptor: attach token ─────────────────────────────────────────
 api.interceptors.request.use((config) => {
-  const token = getAccessToken();
+  const token = useAuthStore.getState().accessToken;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-  
-  console.group(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`);
-  console.log('Headers:', config.headers);
-  if (config.data) console.log('Payload:', config.data);
-  console.groupEnd();
-  
+
+  if (import.meta.env.DEV) {
+    console.group(`🚀 ${config.method?.toUpperCase()} ${config.url}`);
+    if (config.data) console.log('↑ payload:', config.data);
+    console.groupEnd();
+  }
+
   return config;
 });
 
+// ── Response interceptor: handle 401 + refresh ────────────────────────────────
 api.interceptors.response.use(
   (response) => {
-    console.group(`✅ API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`);
-    console.log('Status:', response.status);
-    console.log('Data:', response.data);
-    console.groupEnd();
+    if (import.meta.env.DEV) {
+      console.group(`✅ ${response.config.method?.toUpperCase()} ${response.config.url} [${response.status}]`);
+      console.log('↓ data:', response.data);
+      console.groupEnd();
+    }
     return response;
   },
   async (error) => {
-    console.group(`❌ API Error: ${error.config?.method?.toUpperCase()} ${error.config?.url}`);
-    if (error.response) {
-      console.error('Status:', error.response.status);
-      console.error('Data:', error.response.data);
-    } else if (error.request) {
-      console.error('No response received:', error.request);
-    } else {
-      console.error('Error config:', error.message);
+    if (import.meta.env.DEV) {
+      console.group(`❌ ${error.config?.method?.toUpperCase()} ${error.config?.url} [${error.response?.status}]`);
+      console.error('error:', error.response?.data ?? error.message);
+      console.groupEnd();
     }
-    console.groupEnd();
 
-    // Auto-refresh logic
     const originalRequest = error.config;
-    if (error.response?.status === 401 && !originalRequest._retry && originalRequest.url !== '/auth/refresh') {
+
+    // Auto-refresh on 401 (but not the refresh endpoint itself)
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes('/auth/refresh') &&
+      !originalRequest.url?.includes('/auth/login')
+    ) {
       originalRequest._retry = true;
       try {
-        console.log('🔄 Attempting token refresh...');
+        console.log('🔄 Refreshing token...');
         const res = await axios.post('/api/auth/refresh', {}, { withCredentials: true });
-        const newToken = res.data.data.accessToken;
-        setAccessToken(newToken);
-        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        const { accessToken, user } = res.data.data;
+        useAuthStore.getState().setAuth(user, accessToken);
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
         return api(originalRequest);
-      } catch (refreshError) {
-        console.error('❌ Token refresh failed. User logged out.');
-        setAccessToken(null);
-        // Dispatch custom event to trigger UI redirect/reset
-        window.dispatchEvent(new Event('auth:logout'));
+      } catch {
+        console.warn('🔒 Refresh failed — clearing session');
+        useAuthStore.getState().clearAuth();
+        window.dispatchEvent(new CustomEvent('auth:expired'));
       }
     }
 

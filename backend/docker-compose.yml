@@ -1,0 +1,86 @@
+# docker-compose.yml — Backend + Postgres only
+# Usage:
+#   docker compose up -d         → start both services
+#   docker compose logs -f       → stream logs
+#   docker compose down -v       → stop and remove volumes
+#
+# Copy backend/.env.example → backend/.env and fill in your secrets before running.
+
+version: "3.9"
+
+services:
+
+  # ─────────────────────────────────────────────────────────────────
+  # PostgreSQL
+  # ─────────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: linear_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER:     ${POSTGRES_USER:-linear}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-linear_secret}
+      POSTGRES_DB:       ${POSTGRES_DB:-linear_clone}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"    # expose so local Prisma Studio works
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-linear} -d ${POSTGRES_DB:-linear_clone}"]
+      interval: 10s
+      timeout:  5s
+      retries:  5
+      start_period: 10s
+
+  # ─────────────────────────────────────────────────────────────────
+  # Backend API  (built from ./Dockerfile)
+  # ─────────────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE_ENV: production
+    container_name: linear_backend
+    restart: unless-stopped
+
+    # Load every variable from .env, then let the block below override
+    # anything that must use the Docker service-name instead of localhost.
+    env_file:
+      - .env
+
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+
+      # Override DATABASE_URL to use the Docker-internal hostname "postgres"
+      DATABASE_URL: >-
+        postgresql://${POSTGRES_USER:-linear}:${POSTGRES_PASSWORD:-linear_secret}@postgres:5432/${POSTGRES_DB:-linear_clone}?schema=public&connection_limit=10&pool_timeout=30
+
+      # DIRECT_URL also points to postgres (used by Prisma migrations)
+      DIRECT_URL: >-
+        postgresql://${POSTGRES_USER:-linear}:${POSTGRES_PASSWORD:-linear_secret}@postgres:5432/${POSTGRES_DB:-linear_clone}?schema=public
+
+      # Allow requests from the frontend container and local dev
+      CORS_ORIGIN: "http://localhost:5173,http://localhost,http://frontend"
+
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3000/api/health || exit 1"]
+      interval: 30s
+      timeout:  10s
+      retries:  3
+      start_period: 20s
+
+    # Optional: override command to run migrations on each start
+    # command: sh -c "npx prisma migrate deploy && node dist/index.js"
+
+volumes:
+  pg_data:
+    driver: local

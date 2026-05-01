@@ -1,15 +1,42 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3000',
-        changeOrigin: true,
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+
+  // In dev: proxy /api to local backend (VITE_API_URL defaults to /api)
+  // In production Docker build: nginx handles the proxy — no Vite proxy needed
+  const apiTarget = env.VITE_API_BACKEND_URL || 'http://localhost:3000'
+
+  return {
+    plugins: [react()],
+    server: {
+      port: 5173,
+      proxy: {
+        '/api': {
+          target: apiTarget,
+          changeOrigin: true,
+          secure: false,
+        },
       },
     },
-  },
+    build: {
+      // Chunk splitting for better caching
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            vendor: ['react', 'react-dom', 'react-router-dom'],
+            query: ['@tanstack/react-query'],
+            state: ['zustand'],
+          },
+        },
+      },
+      sourcemap: false,
+      minify: 'esbuild',
+    },
+    preview: {
+      port: 4173,
+    },
+  }
 })

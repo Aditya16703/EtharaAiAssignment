@@ -1,3 +1,4 @@
+console.log("🚀 Starting backend initialization...");
 import { z } from "zod";
 import dotenv from "dotenv";
 

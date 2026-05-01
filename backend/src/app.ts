@@ -43,7 +43,7 @@ app.use(cookieParser());
 // ── Global rate limiter ───────────────────────────────────────────────────────
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 300,
+  max: env.NODE_ENV === "production" ? 300 : 10000,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many requests, please try again later.", code: "RATE_LIMITED" },
@@ -53,7 +53,7 @@ app.use("/api", globalLimiter);
 // ── Auth rate limiter (stricter) ──────────────────────────────────────────────
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 20,
+  max: env.NODE_ENV === "production" ? 20 : 1000,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many auth attempts, please try again later.", code: "AUTH_RATE_LIMITED" },
@@ -71,10 +71,19 @@ app.use("/api/workspaces/:slug/members", memberRoutes);
 app.use("/api/workspaces/:slug/issues", issueRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
-// ── 404 ───────────────────────────────────────────────────────────────────────
-app.use((_req, res) => {
-  res.status(404).json({ error: "Route not found", code: "NOT_FOUND" });
-});
+// ── 404 & SPA Routing ───────────────────────────────────────────────────────────
+import path from "path";
+
+if (env.NODE_ENV === "production") {
+  app.use(express.static(path.join(__dirname, "public")));
+  app.get("*", (_req, res) => {
+    res.sendFile(path.join(__dirname, "public", "index.html"));
+  });
+} else {
+  app.use((_req, res) => {
+    res.status(404).json({ error: "Route not found", code: "NOT_FOUND" });
+  });
+}
 
 // ── Global error handler ──────────────────────────────────────────────────────
 app.use(errorHandler);

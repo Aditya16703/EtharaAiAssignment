@@ -28,7 +28,6 @@ export class MemberController {
       const member = await MemberService.invite(req.workspace!.id, data.email);
       res.json({ data: member, error: null, message: "ok" });
     } catch (e) {
-      if (e instanceof z.ZodError) return next(new AppError(400, (e as any).errors[0].message, "VALIDATION_ERROR"));
       next(e);
     }
   }
@@ -39,7 +38,6 @@ export class MemberController {
       const member = await MemberService.changeRole(req.workspace!.id, req.params.userId as string, data.role as WorkspaceRole);
       res.json({ data: member, error: null, message: "ok" });
     } catch (e) {
-      if (e instanceof z.ZodError) return next(new AppError(400, (e as any).errors[0].message, "VALIDATION_ERROR"));
       next(e);
     }
   }

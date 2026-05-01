@@ -33,6 +33,13 @@ export class IssueService {
       const prefix = workspace.slug.toUpperCase().slice(0, 3);
       const identifier = `${prefix}-${count + 1}`;
 
+      if (data.assigneeId) {
+        const isMember = await tx.workspaceMember.findUnique({
+          where: { workspaceId_userId: { workspaceId, userId: data.assigneeId } }
+        });
+        if (!isMember) throw new AppError(400, "Assignee must be a member of the workspace", "VALIDATION_ERROR");
+      }
+
       return await tx.issue.create({
         data: {
           identifier,
@@ -82,6 +89,13 @@ export class IssueService {
   }
 
   static async updateAssignee(workspaceId: string, id: string, assigneeId: string | null) {
+    if (assigneeId) {
+      const isMember = await prisma.workspaceMember.findUnique({
+        where: { workspaceId_userId: { workspaceId, userId: assigneeId } }
+      });
+      if (!isMember) throw new AppError(400, "Assignee must be a member of the workspace", "VALIDATION_ERROR");
+    }
+
     const issue = await prisma.issue.update({
       where: { id, workspaceId },
       data: { assigneeId },

@@ -34,6 +34,18 @@ export class MemberService {
   }
 
   static async changeRole(workspaceId: string, userId: string, role: WorkspaceRole) {
+    if (role === "MEMBER") {
+      const adminCount = await prisma.workspaceMember.count({
+        where: { workspaceId, role: "ADMIN" },
+      });
+      if (adminCount <= 1) {
+        const member = await prisma.workspaceMember.findUnique({ where: { workspaceId_userId: { workspaceId, userId } } });
+        if (member?.role === "ADMIN") {
+          throw new AppError(400, "Cannot demote the only admin", "VALIDATION_ERROR");
+        }
+      }
+    }
+
     const member = await prisma.workspaceMember.update({
       where: { workspaceId_userId: { workspaceId, userId } },
       data: { role },
@@ -42,6 +54,19 @@ export class MemberService {
   }
 
   static async remove(workspaceId: string, userId: string) {
+    const member = await prisma.workspaceMember.findUnique({
+      where: { workspaceId_userId: { workspaceId, userId } },
+    });
+
+    if (member?.role === "ADMIN") {
+      const adminCount = await prisma.workspaceMember.count({
+        where: { workspaceId, role: "ADMIN" },
+      });
+      if (adminCount <= 1) {
+        throw new AppError(400, "Cannot remove the only admin", "VALIDATION_ERROR");
+      }
+    }
+
     await prisma.workspaceMember.delete({
       where: { workspaceId_userId: { workspaceId, userId } },
     });

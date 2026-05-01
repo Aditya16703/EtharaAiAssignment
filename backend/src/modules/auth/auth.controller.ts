@@ -31,7 +31,6 @@ export class AuthController {
 
       res.json({ data: { user, accessToken }, error: null, message: "ok" });
     } catch (e) {
-      if (e instanceof z.ZodError) return next(new AppError(400, (e as any).errors[0].message, "VALIDATION_ERROR"));
       next(e);
     }
   }
@@ -51,7 +50,6 @@ export class AuthController {
 
       res.json({ data: { user, accessToken }, error: null, message: "ok" });
     } catch (e) {
-      if (e instanceof z.ZodError) return next(new AppError(400, (e as any).errors[0].message, "VALIDATION_ERROR"));
       next(e);
     }
   }

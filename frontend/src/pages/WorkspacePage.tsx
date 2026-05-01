@@ -6,6 +6,8 @@ import { Modal } from '../components/Modal';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
 import { Skeleton } from '../components/Skeleton';
+import { TeamManagementModal } from '../components/TeamManagementModal';
+import { Users } from 'lucide-react';
 
 const STATUSES = [
   { key: 'BACKLOG', label: 'Backlog', color: '#71717a' },
@@ -154,6 +156,7 @@ export function WorkspacePage() {
   const { slug } = useParams<{ slug: string }>();
   const [filterStatus, setFilterStatus] = useState('');
   const [createOpen, setCreateOpen] = useState(false);
+  const [teamOpen, setTeamOpen] = useState(false);
 
   const { data: workspace, isLoading: wsLoading } = useWorkspace(slug!);
   const { data: members = [] } = useMembers(slug!);
@@ -191,6 +194,9 @@ export function WorkspacePage() {
             ))}
             {members.length > 5 && <span style={{ fontSize: '12px', color: 'var(--text-tertiary)', marginLeft: '8px', alignSelf: 'center' }}>+{members.length - 5}</span>}
           </div>
+          <Button variant="ghost" size="sm" onClick={() => setTeamOpen(true)}>
+            <Users size={14} style={{ marginRight: '6px' }} />Team
+          </Button>
           <Button size="sm" onClick={() => setCreateOpen(true)}>
             <Plus size={14} style={{ marginRight: '6px' }} />New Issue
           </Button>
@@ -239,6 +245,7 @@ export function WorkspacePage() {
       </div>
 
       <CreateIssueModal slug={slug!} isOpen={createOpen} onClose={() => setCreateOpen(false)} />
+      <TeamManagementModal slug={slug!} isOpen={teamOpen} onClose={() => setTeamOpen(false)} />
     </div>
   );
 }

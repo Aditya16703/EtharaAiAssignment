@@ -30,7 +30,6 @@ export class WorkspaceController {
       const workspace = await WorkspaceService.create(req.user!.id, data);
       res.json({ data: workspace, error: null, message: "ok" });
     } catch (e) {
-      if (e instanceof z.ZodError) return next(new AppError(400, (e as any).errors[0].message, "VALIDATION_ERROR"));
       next(e);
     }
   }
@@ -50,7 +49,6 @@ export class WorkspaceController {
       const workspace = await WorkspaceService.update(req.params.slug as string, data);
       res.json({ data: workspace, error: null, message: "ok" });
     } catch (e) {
-      if (e instanceof z.ZodError) return next(new AppError(400, (e as any).errors[0].message, "VALIDATION_ERROR"));
       next(e);
     }
   }

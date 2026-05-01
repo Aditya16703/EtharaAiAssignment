@@ -43,7 +43,6 @@ export class IssueController {
       const issue = await IssueService.create(req.workspace!.id, req.user!.id, data);
       res.json({ data: issue, error: null, message: "ok" });
     } catch (e) {
-      if (e instanceof z.ZodError) return next(new AppError(400, (e as any).errors[0].message, "VALIDATION_ERROR"));
       next(e);
     }
   }
@@ -63,7 +62,6 @@ export class IssueController {
       const issue = await IssueService.update(req.workspace!.id, req.params.id as string, data);
       res.json({ data: issue, error: null, message: "ok" });
     } catch (e) {
-      if (e instanceof z.ZodError) return next(new AppError(400, (e as any).errors[0].message, "VALIDATION_ERROR"));
       next(e);
     }
   }
@@ -83,7 +81,6 @@ export class IssueController {
       const issue = await IssueService.updateStatus(req.workspace!.id, req.params.id as string, data.status as IssueStatus);
       res.json({ data: issue, error: null, message: "ok" });
     } catch (e) {
-      if (e instanceof z.ZodError) return next(new AppError(400, (e as any).errors[0].message, "VALIDATION_ERROR"));
       next(e);
     }
   }
@@ -94,7 +91,6 @@ export class IssueController {
       const issue = await IssueService.updateAssignee(req.workspace!.id, req.params.id as string, data.assigneeId);
       res.json({ data: issue, error: null, message: "ok" });
     } catch (e) {
-      if (e instanceof z.ZodError) return next(new AppError(400, (e as any).errors[0].message, "VALIDATION_ERROR"));
       next(e);
     }
   }

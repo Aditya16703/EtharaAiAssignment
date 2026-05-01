@@ -74,6 +74,28 @@ export function useInviteMember(slug: string) {
   });
 }
 
+export function useUpdateMemberRole(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, role }: { userId: string; role: string }) =>
+      api.patch(`/workspaces/${slug}/members/${userId}/role`, { role }).then(r => r.data.data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.members(slug) });
+    },
+  });
+}
+
+export function useRemoveMember(slug: string) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (userId: string) =>
+      api.delete(`/workspaces/${slug}/members/${userId}`).then(r => r.data.data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: keys.members(slug) });
+    },
+  });
+}
+
 // ── Issues ────────────────────────────────────────────────────────────────────
 export function useIssues(slug: string, filters: Record<string, string> = {}) {
   const params = new URLSearchParams(filters).toString();

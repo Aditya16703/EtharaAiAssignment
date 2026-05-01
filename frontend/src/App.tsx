@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useAuthStore } from './store/authStore';
 import { useMe } from './hooks/queries';
@@ -12,7 +12,7 @@ import { AppLayout } from './layouts/AppLayout';
 function AppBootstrap() {
   const { user, accessToken, setAuth, clearAuth, isHydrated } = useAuthStore();
   const navigate = useNavigate();
-  const { data: meData, isLoading, isError } = useMe();
+  const { data: meData, isLoading } = useMe();
 
   // Sync TanStack Query user data into Zustand store
   useEffect(() => {
@@ -34,8 +34,8 @@ function AppBootstrap() {
   // Wait for Zustand to rehydrate from localStorage
   if (!isHydrated) return <Spinner />;
 
-  // If we have a token but /me is still loading
-  if (accessToken && isLoading) return <Spinner />;
+  // If we have a token but /me is still loading AND we don't have a cached user yet
+  if (accessToken && isLoading && !user) return <Spinner />;
 
   const isAuthenticated = !!(accessToken && (user || meData));
 

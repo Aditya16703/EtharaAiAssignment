@@ -22,16 +22,8 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
-      // Chunk splitting for better caching
-      rollupOptions: {
-        output: {
-          manualChunks: {
-            vendor: ['react', 'react-dom', 'react-router-dom'],
-            query: ['@tanstack/react-query'],
-            state: ['zustand'],
-          },
-        },
-      },
+      // Chunk splitting left to defaults
+      rollupOptions: {},
       sourcemap: false,
       minify: 'esbuild',
     },

@@ -25,6 +25,14 @@ export const errorHandler = (
     });
   }
 
+  if (err.name === "ZodError" || err.constructor?.name === "ZodError") {
+    return res.status(400).json({
+      data: null,
+      error: "VALIDATION_ERROR",
+      message: err.errors?.[0]?.message || "Validation failed",
+    });
+  }
+
   console.error("Unhandled error:", err);
   return res.status(500).json({
     data: null,

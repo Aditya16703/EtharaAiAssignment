@@ -8,7 +8,7 @@ const router = Router({ mergeParams: true });
 router.use(authenticate);
 
 router.get("/", requireRole("MEMBER"), IssueController.list);
-router.post("/", requireRole("ADMIN"), IssueController.create);
+router.post("/", requireRole("MEMBER"), IssueController.create);
 router.get("/:id", requireRole("MEMBER"), IssueController.get);
 router.patch("/:id", requireRole("ADMIN"), IssueController.update);
 router.patch("/:id/status", requireRole("MEMBER"), IssueController.updateStatus); // Status has specific auth inside controller

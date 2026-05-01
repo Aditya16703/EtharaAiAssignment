@@ -2,34 +2,35 @@
 
 :root {
   /* Colors - Linear inspired Dark Theme */
-  --bg-app: #0e0e11;
-  --bg-sidebar: #18181b;
-  --bg-panel: #222226;
+  --bg-app: #0b141e;
+  --bg-sidebar: #060f19;
+  --bg-panel: #17202b;
   --bg-hover: rgba(255, 255, 255, 0.05);
-  --bg-active: rgba(255, 255, 255, 0.1);
+  --bg-active: rgba(255, 255, 255, 0.08);
   
-  --text-primary: #f4f4f5;
+  --text-primary: #dae3f2;
   --text-secondary: #a1a1aa;
   --text-tertiary: #71717a;
   
-  --border-color: #27272a;
-  --border-highlight: rgba(255, 255, 255, 0.15);
+  --border-color: #2c3541;
+  --border-highlight: rgba(255, 255, 255, 0.1);
   
-  --brand-primary: #5e6ad2;
-  --brand-hover: #4e5abf;
+  --brand-primary: #4f46e5; /* Indigo */
+  --brand-hover: #4338ca;
+  --brand-accent: #44e2d7; /* Teal */
   
-  --danger: #ef4444;
+  --danger: #ffb4ab;
   --success: #22c55e;
   --warning: #f59e0b;
   
   /* Status Colors */
   --status-todo: #a1a1aa;
   --status-inprogress: #f59e0b;
-  --status-done: #5e6ad2;
-  --status-canceled: #ef4444;
+  --status-done: #4f46e5;
+  --status-canceled: #ffb4ab;
 
   /* Priority Colors */
-  --priority-urgent: #ef4444;
+  --priority-urgent: #ffb4ab;
   --priority-high: #f59e0b;
   --priority-medium: #a1a1aa;
   --priority-low: #71717a;
@@ -41,9 +42,58 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 15px rgba(79, 70, 229, 0.3);
   --radius-sm: 4px;
   --radius-md: 6px;
-  --radius-lg: 8px;
+  --radius-lg: 12px;
+}
+
+.auth-split-layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-app);
+}
+
+.auth-visual-side {
+  flex: 1.2;
+  background: radial-gradient(circle at center, #17202b 0%, #0b141e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-visual-side::before {
+  content: '';
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  background: radial-gradient(circle at 30% 30%, rgba(68, 226, 215, 0.08) 0%, transparent 50%),
+              radial-gradient(circle at 70% 70%, rgba(79, 70, 229, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.auth-form-side {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  z-index: 10;
+}
+
+@media (max-width: 900px) {
+  .auth-visual-side { display: none; }
+}
+
+.glass-card {
+  background: rgba(23, 32, 43, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
 * {

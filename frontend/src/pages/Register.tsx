@@ -5,7 +5,7 @@ import { useAuthStore } from '../store/authStore';
 import { useQueryClient } from '@tanstack/react-query';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
-import { UserPlus, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 export function Register() {
   const [name, setName] = useState('');

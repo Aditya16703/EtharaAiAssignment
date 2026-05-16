@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm run build"
+buildCommand = "npm install --legacy-peer-deps && npm run db:generate -w backend && npm run build"
 
 [deploy]
 startCommand = "npm run start"

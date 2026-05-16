@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev -w backend\" \"npm run dev -w frontend\"",
-    "build": "npm run build -w backend && npm run build -w frontend && cp -r frontend/dist backend/dist/public",
+    "build": "npm ci --legacy-peer-deps && npm run db:generate -w backend && npm run build -w backend && npm run build -w frontend && cp -r frontend/dist backend/dist/public",
     "start": "node backend/dist/index.js"
   },
   "devDependencies": {

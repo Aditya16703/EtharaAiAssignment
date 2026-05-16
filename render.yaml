@@ -3,7 +3,7 @@ services:
     name: flowdesk-backend
     runtime: node
     rootDir: backend
-    buildCommand: npm install && npm run build
+    buildCommand: npm install --legacy-peer-deps && npm run db:generate && npm run build
     startCommand: node dist/index.js
     envVars:
       - key: NODE_ENV

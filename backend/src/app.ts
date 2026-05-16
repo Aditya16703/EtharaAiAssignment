@@ -82,19 +82,11 @@ app.use("/api/workspaces/:slug/members", memberRoutes);
 app.use("/api/workspaces/:slug/issues", issueRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 
-// ── 404 & SPA Routing ───────────────────────────────────────────────────────────
-import path from "path";
-
-if (env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "public")));
-  app.get("*", (_req, res) => {
-    res.sendFile(path.join(__dirname, "public", "index.html"));
-  });
-} else {
-  app.use((_req, res) => {
-    res.status(404).json({ error: "Route not found", code: "NOT_FOUND" });
-  });
-}
+// ── 404 handler ──────────────────────────────────────────────────────────────
+// For unmatched routes, return 404 (API-only service)
+app.use((_req, res) => {
+  res.status(404).json({ error: "Route not found", code: "NOT_FOUND" });
+});
 
 // ── Global error handler ──────────────────────────────────────────────────────
 app.use(errorHandler);
